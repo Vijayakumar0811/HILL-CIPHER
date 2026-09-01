@@ -33,129 +33,79 @@ STEP-5: Combine all these groups to get the complete cipher text.
 ```
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-
-int keymat[3][3] = {
-    {1, 2, 1},
-    {2, 3, 2},
-    {2, 2, 1}
-};
-
-int invkeymat[3][3] = {
-    {-1, 0, 1},
-    {2, -1, 0},
-    {-2, 2, -1}
-};
-
-char key[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-// Encode 3 characters
-char *encode(char a, char b, char c)
-{
-    static char ret[4];
-    int x, y, z;
-
-    int posa = a - 'A';
-    int posb = b - 'A';
-    int posc = c - 'A';
-
-    x = posa * keymat[0][0] + posb * keymat[1][0] + posc * keymat[2][0];
-    y = posa * keymat[0][1] + posb * keymat[1][1] + posc * keymat[2][1];
-    z = posa * keymat[0][2] + posb * keymat[1][2] + posc * keymat[2][2];
-
-    ret[0] = key[x % 26];
-    ret[1] = key[y % 26];
-    ret[2] = key[z % 26];
-    ret[3] = '\0';
-
-    return ret;
-}
-
-// Decode 3 characters
-char *decode(char a, char b, char c)
-{
-    static char ret[4];
-    int x, y, z;
-
-    int posa = a - 'A';
-    int posb = b - 'A';
-    int posc = c - 'A';
-
-    x = posa * invkeymat[0][0] + posb * invkeymat[1][0] + posc * invkeymat[2][0];
-    y = posa * invkeymat[0][1] + posb * invkeymat[1][1] + posc * invkeymat[2][1];
-    z = posa * invkeymat[0][2] + posb * invkeymat[1][2] + posc * invkeymat[2][2];
-
-    ret[0] = key[(x % 26 + 26) % 26];
-    ret[1] = key[(y % 26 + 26) % 26];
-    ret[2] = key[(z % 26 + 26) % 26];
-    ret[3] = '\0';
-
-    return ret;
-}
 
 int main()
 {
-    char msg[1000];
-    char enc[1000] = "";
-    char dec[1000] = "";
-    int n;
+    int key[3][3] = {
+        {6, 24, 1},
+        {13, 16, 10},
+        {20, 17, 15}
+    };
 
-    printf("Simulation of Hill Cipher\n");
+    int inv[3][3] = {
+        {8, 5, 10},
+        {21, 8, 21},
+        {21, 12, 8}
+    };
 
-    // Get input from user
-    printf("Enter the message: ");
-    fgets(msg, sizeof(msg), stdin);
+    char text[100], cipher[100], decrypt[100];
+    int i, j, k, len;
+    int sum;
 
-    // Remove newline character
-    msg[strcspn(msg, "\n")] = '\0';
+    printf("Enter plaintext: ");
+    scanf("%s", text);
 
-    // Convert to uppercase and remove spaces
-    int j = 0;
-    for (int i = 0; msg[i] != '\0'; i++)
+    len = strlen(text);
+
+    /* Add X for padding */
+    while (len % 3 != 0)
     {
-        if (msg[i] != ' ')
+        text[len++] = 'X';
+        text[len] = '\0';
+    }
+
+    /* Encryption */
+    for (i = 0; i < len; i += 3)
+    {
+        for (j = 0; j < 3; j++)
         {
-            msg[j++] = toupper(msg[i]);
+            sum = 0;
+
+            for (k = 0; k < 3; k++)
+                sum += key[j][k] * (text[i + k] - 'A');
+
+            cipher[i + j] = (sum % 26) + 'A';
         }
     }
-    msg[j] = '\0';
 
-    printf("Input message : %s\n", msg);
+    cipher[len] = '\0';
 
-    // Padding with X
-    n = strlen(msg) % 3;
-    if (n != 0)
+    /* Decryption */
+    for (i = 0; i < len; i += 3)
     {
-        for (int i = 0; i < (3 - n); i++)
+        for (j = 0; j < 3; j++)
         {
-            strcat(msg, "X");
+            sum = 0;
+
+            for (k = 0; k < 3; k++)
+                sum += inv[j][k] * (cipher[i + k] - 'A');
+
+            decrypt[i + j] = (sum % 26) + 'A';
         }
     }
 
-    printf("Padded message : %s\n", msg);
+    decrypt[len] = '\0';
 
-    // Encryption
-    for (int i = 0; i < strlen(msg); i += 3)
-    {
-        strcat(enc, encode(msg[i], msg[i + 1], msg[i + 2]));
-    }
-
-    printf("Encoded message : %s\n", enc);
-
-    // Decryption
-    for (int i = 0; i < strlen(enc); i += 3)
-    {
-        strcat(dec, decode(enc[i], enc[i + 1], enc[i + 2]));
-    }
-
-    printf("Decoded message : %s\n", dec);
+    printf("\nEncrypted text : %s", cipher);
+    printf("\nDecrypted text : %s\n", decrypt);
 
     return 0;
 }
+
 ```
 ## OUTPUT
 
-<img width="722" height="312" alt="image" src="https://github.com/user-attachments/assets/8a9576da-877a-4e02-acaf-880814c52413" />
+<img width="530" height="256" alt="image" src="https://github.com/user-attachments/assets/5dbc97f7-4795-477d-9fea-0f876f1b8c7a" />
 
 ## RESULT
 
